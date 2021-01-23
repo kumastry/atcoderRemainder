@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import {fetchPromDiff, fetchPromInfo} from './api';
 
 
 function Header() {
@@ -37,9 +38,9 @@ function ProblemSet(props) {
        
             <div className="card" style={{margin:'0.3em'}}>
             <div className="card-content" >
-            <p class="title" id="edit">
-                <a href = {`https://atcoder.jp/contests/${array.contest}/tasks/${array.problem}`} target="_black">
-                {array.problem} 
+            <p class="title">
+                <a href = {array.url} target="_black">
+                {array.title + " diff:" + array.diff} 
                 </a>
             </p>
 
@@ -58,26 +59,54 @@ function ProblemSet(props) {
 }
 
 function Main() {
-    const [problemId, setProblemId] = useState('');
-    const [problems, setProblems] = useState([])
+    const [problemUrl, setProblemUrl] = useState('');
+    const [problems, setProblems] = useState([]);
 
     function handleChange(event) {
-        setProblemId(event.target.value);
+        setProblemUrl(event.target.value);
     }
 
     function addProblem(event) {
         let tmp = problems.slice(0, problems.length);
-        const contestId = problemId.substr(0, problemId.length-2);
-        tmp.unshift({problem:problemId, 
-                           contest:contestId});
-        const f = () => {
-            console.log(problems.length);
+
+        const urlsplit = problemUrl.split('/');
+        const problem_Id_tmp = urlsplit[urlsplit.length-1];
+        const contest_tmp = urlsplit[urlsplit.length-3];
+
+        let Name_tmp = '';
+        let diff_tmp = 0;
+
+        fetchPromInfo().then((url1s) => {
+
+            url1s.map((url1s) => {
+                if(url1s.id === problem_Id_tmp) {
+                    Name_tmp = url1s.title;
+                    console.log(Name_tmp);
+                }
+            });
+
+        }).then(() => {
+
+            fetchPromDiff().then((url2s) => {
+                diff_tmp = url2s[problem_Id_tmp]['difficulty'];
+                console.log(url2s);
+                console.log(diff_tmp);
+            }).then(() => {
+            const infoOnbect = {
+                title:Name_tmp,
+                url:problemUrl,
+                id:problem_Id_tmp,
+                contest:contest_tmp,
+                diff:diff_tmp
+            }
+            
+            console.log(infoOnbect.diff);
+            tmp.unshift(infoOnbect);
             setProblems(tmp);
-            console.log(problems.length);
-        }                           
+        });
         
-        f();
-        setProblemId('');
+    });
+
     }
 
     function deleteTask(key) {
@@ -89,9 +118,8 @@ function Main() {
     return(
         <main>
         <section className="section">
-            <input className="input" type="text" placeholder="Problem ID" value = {problemId} onChange={handleChange} />
+            <input className="input" type="text" placeholder="Problem URL" value = {problemUrl} onChange={handleChange} />
             <button className="button is-fullwidth is-success is-light" onClick={addProblem}>Add Problem</button>
-
             <section className="section">
                 <ProblemSet array={problems} deleteTask={deleteTask}/>
             </section>
