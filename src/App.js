@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {fetchPromDiff, fetchPromInfo} from './api';
+import {fetchPromDiff, fetchPromInfo, fetchUesrsSub} from './api';
 
 
 function Header() {
@@ -9,7 +9,7 @@ function Header() {
                 <div className="hero-body">
                     <div class="container">
                         <h1 className="title is-3">
-                            Atcoder Remainder
+                        Atcoder Reminder
                      </h1>
                  </div>
                 </div>
@@ -18,13 +18,34 @@ function Header() {
     );
 }
 
-function Nav() {
+
+function Card(props) {
+    console.log(props.array.sub);
+    let background = '';
+    console.log(props.array.sub);
+    if(props.array.sub === 'AC') {
+        background= "#c8e4cc";
+    } else if (props.array.sub !== 'nosub'){
+        background="#fcecbc";
+    } else {
+        background="#ffffff";
+    }
+
     return(
-        <nav className="navbar" role="navigation" aria-label="main nabigation">
-            <div className="navbar-brand">
-                <input className="navbar-item" type="text" placeholder="Username"></input>
+        <div className="card" style={{ margin: "8px", backgroundColor:background,}}>
+            <div className="card-content" >
+                <p class="title">
+                    <a href = {props.array.url} target="_black">
+                        {props.array.title + " diff:" + props.array.diff + " submission:" + props.array.sub} 
+                    </a>
+                </p>
+
+                <footer class="card-footer">
+                    {/* <input  type = "button" value = "edit" className="card-footer-item" onClick ={() => props.editTask(key)}/> */}  
+                    <input  type = "button" value = "delete" className="card-footer-item" onClick={() => props.deleteTask(props.key)} />
+                </footer>
             </div>
-        </nav>
+        </div>
     );
 }
 
@@ -32,33 +53,16 @@ function ProblemSet(props) {
 
     return (
         <div>
-        <div className="is-vertical-center" >       
-        {props.array.map( (array, key) => {
-            return  ( 
-       
-            <div className="card" style={{margin:'0.3em'}}>
-            <div className="card-content" >
-            <p class="title">
-                <a href = {array.url} target="_black">
-                {array.title + " diff:" + array.diff} 
-                </a>
-            </p>
-
-            <footer class="card-footer">
-                {/* <input  type = "button" value = "edit" className="card-footer-item" onClick ={() => props.editTask(key)}/> */}  
-                <input  type = "button" value = "delete" className="card-footer-item" onClick={() => props.deleteTask(key)} />
-            </footer>
-
+            <div className="is-vertical-center" >       
+                {props.array.map( (array, key) => {
+                    return <Card array={array} key ={key} deleteTask={props.deleteTask} />
+                })}
             </div>
-            </div>
-            );
-        })}
-            </div>
-            </div>        
-        );
+        </div>        
+    );
 }
 
-function Main() {
+function From(props) {
     const [problemUrl, setProblemUrl] = useState('');
     const [problems, setProblems] = useState([]);
 
@@ -75,6 +79,7 @@ function Main() {
 
         let Name_tmp = '';
         let diff_tmp = 0;
+        let sub_tmp = 'nosub';
 
         fetchPromInfo().then((url1s) => {
 
@@ -87,27 +92,47 @@ function Main() {
 
         }).then(() => {
 
-            fetchPromDiff().then((url2s) => {
-                diff_tmp = url2s[problem_Id_tmp]['difficulty'];
-                console.log(url2s);
-                console.log(diff_tmp);
-            }).then(() => {
-            const infoOnbect = {
-                title:Name_tmp,
-                url:problemUrl,
-                id:problem_Id_tmp,
-                contest:contest_tmp,
-                diff:diff_tmp
-            }
-            
-            console.log(infoOnbect.diff);
-            tmp.unshift(infoOnbect);
-            setProblems(tmp);
-        });
-        
-    });
+            if(Name_tmp !== '') {
+                fetchPromDiff().then((url2s) => {
+                    diff_tmp = url2s[problem_Id_tmp]['difficulty'];
 
+                } ).then(() => {
+                    fetchUesrsSub('kumastry').then((url3) => {
+
+                        url3.map((url3) => {
+                            console.log(url3);
+                            if(url3.problem_id === problem_Id_tmp) {
+                                sub_tmp = url3.result;
+                            
+                            }
+                        });  
+
+                    }).then(() => {
+                        const problem_Obj = {
+                            title:Name_tmp,
+                            url:problemUrl,
+                            diff:diff_tmp,
+                            problem_id:problem_Id_tmp,
+                            contest:contest_tmp,
+                            sub:sub_tmp
+                        };
+
+                        console.log(problem_Obj.sub);
+                        console.log(sub_tmp);
+                        tmp.unshift(problem_Obj);
+                        setProblems(tmp);
+                        
+                    });
+                });
+            } else {
+                alert("Problem Not Found");
+            }
+        });
+
+        setProblemUrl('');
     }
+    
+    
 
     function deleteTask(key) {
         let tmp = problems.slice(0, problems.length);
@@ -116,16 +141,48 @@ function Main() {
     }
 
     return(
-        <main>
-        <section className="section">
-            <input className="input" type="text" placeholder="Problem URL" value = {problemUrl} onChange={handleChange} />
-            <button className="button is-fullwidth is-success is-light" onClick={addProblem}>Add Problem</button>
+        <div>
+            <main>
             <section className="section">
-                <ProblemSet array={problems} deleteTask={deleteTask}/>
+                <input className="input" type="text" placeholder="Problem URL" value = {problemUrl} onChange={handleChange} />
+                <button className="button is-fullwidth is-success is-light" onClick={addProblem}>Add Problem</button>
+                <section className="section">
+                    <ProblemSet array={problems} deleteTask={deleteTask}/>
+                </section>
             </section>
-        </section>
-        </main>
+            </main>
+        </div>
     );
+}
+
+function Main() {
+    const [userName, setUserName] = useState('');
+
+    function KeyHandle() {
+
+    }
+    
+    return (
+        <div>
+            <nav className="navbar" role="navigation" aria-label="main nabigation">
+                <div className="navbar-brand">
+                    <input className="navbar-item" id = 'userform' value = {userName} onChange={e => setUserName(e.target.value)} type="text" placeholder="Username" onKeyPress={KeyHandle}></input>
+                </div>
+            </nav>
+
+            <From_hide userName = {userName}/>
+        </div>
+    );
+}
+
+function From_hide(props) {
+    if(props.user !== null) {
+        console.log("$$$$$");
+        console.log(props.userName);
+        return <From userName={props.userName} />
+    } else {
+        console.log("#####");
+    }
 }
 
 function Footer() {
@@ -134,7 +191,6 @@ function Footer() {
         <div className="content has-text-centered">
             <hr></hr>
                 <p>2021&copy;kumastry</p>
-                <p><a href = "kumastry2212@gmail.com">e-mail</a></p>
                 <p><a href = "https://twitter.com/kumastry1">twitter</a></p>
         </div>
     </footer>
@@ -145,7 +201,6 @@ function App() {
     return(
         <>
         <Header />
-        <Nav />
         <Main />
         <Footer />
         </>

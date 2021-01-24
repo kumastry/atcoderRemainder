@@ -14,9 +14,9 @@ export  async function fetchPromDiff() {
     return await res.json();
 }
 
-export default async function fetchUesrsSubm() {
+export async function fetchUesrsSub(user_id) {
     const res = await fetch(
-        `https://kenkoooo.com/atcoder/atcoder-api/results?user={user_id}`
+        `https://kenkoooo.com/atcoder/atcoder-api/results?user=${user_id}`
     );
     return await res.json();
 }
