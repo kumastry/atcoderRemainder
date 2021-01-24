@@ -6,7 +6,7 @@ export async function fetchPromInfo() {
     return await res.json();
 }
 
-export  async function fetchPromDiff() {
+export async function fetchPromDiff() {
     const res =  await fetch(
         `https://kenkoooo.com/atcoder/resources/problem-models.json`
     );
@@ -15,6 +15,7 @@ export  async function fetchPromDiff() {
 }
 
 export async function fetchUesrsSub(user_id) {
+    console.log(user_id);
     const res = await fetch(
         `https://kenkoooo.com/atcoder/atcoder-api/results?user=${user_id}`
     );

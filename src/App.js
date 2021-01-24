@@ -7,7 +7,7 @@ function Header() {
         <div>
             <header className="hero is-success is-bold">
                 <div className="hero-body">
-                    <div class="container">
+                    <div className="container">
                         <h1 className="title is-3">
                         Atcoder Reminder
                      </h1>
@@ -31,18 +31,25 @@ function Card(props) {
         background="#ffffff";
     }
 
+
     return(
         <div className="card" style={{ margin: "8px", backgroundColor:background,}}>
             <div className="card-content" >
-                <p class="title">
+                <p className="title">
                     <a href = {props.array.url} target="_black">
-                        {props.array.title + " diff:" + props.array.diff + " submission:" + props.array.sub} 
+
+                        {props.array.contest + " " +props.array.title}<br/>
+                        { "diff:" + props.array.diff + " submission:" + props.array.sub}<br/>
                     </a>
                 </p>
 
-                <footer class="card-footer">
+                <p class="subtitle">
+                    user:{props.array.user}
+                </p>
+
+                <footer className="card-footer">
                     {/* <input  type = "button" value = "edit" className="card-footer-item" onClick ={() => props.editTask(key)}/> */}  
-                    <input  type = "button" value = "delete" className="card-footer-item" onClick={() => props.deleteTask(props.key)} />
+                    <input  type = "button" value = "delete" className="card-footer-item" onClick={() => props.deleteTask(props.id)} />
                 </footer>
             </div>
         </div>
@@ -55,7 +62,7 @@ function ProblemSet(props) {
         <div>
             <div className="is-vertical-center" >       
                 {props.array.map( (array, key) => {
-                    return <Card array={array} key ={key} deleteTask={props.deleteTask} />
+                    return <Card array={array} id ={key} deleteTask={props.deleteTask} />
                 })}
             </div>
         </div>        
@@ -65,18 +72,35 @@ function ProblemSet(props) {
 function From(props) {
     const [problemUrl, setProblemUrl] = useState('');
     const [problems, setProblems] = useState([]);
+    let userName_tmp = props.userName;
+    console.log(userName_tmp);
+
+    useEffect (() => {
+        if(localStorage.array){ 
+            const saveDate = JSON.parse(localStorage.array);
+            setProblems(saveDate);
+          }
+        
+    },[])
+
+    useEffect (() => {
+        localStorage.setItem('array', JSON.stringify(problems));
+    },[problems])
+
+
 
     function handleChange(event) {
         setProblemUrl(event.target.value);
     }
 
     function addProblem(event) {
+        console.log(props.userName);
         let tmp = problems.slice(0, problems.length);
 
         const urlsplit = problemUrl.split('/');
         const problem_Id_tmp = urlsplit[urlsplit.length-1];
         const contest_tmp = urlsplit[urlsplit.length-3];
-
+        
         let Name_tmp = '';
         let diff_tmp = 0;
         let sub_tmp = 'nosub';
@@ -93,43 +117,42 @@ function From(props) {
         }).then(() => {
 
             if(Name_tmp !== '') {
-                fetchPromDiff().then((url2s) => {
-                    diff_tmp = url2s[problem_Id_tmp]['difficulty'];
-
+                fetchPromDiff().then((url2) => {
+                    diff_tmp = typeof(url2[problem_Id_tmp]) === 'undefined'?0:url2[problem_Id_tmp]['difficulty'];
                 } ).then(() => {
-                    fetchUesrsSub('kumastry').then((url3) => {
-                        let ACflag = false;
+                    console.log(userName_tmp);
+                    fetchUesrsSub(userName_tmp).then((url3) => {
                         url3.map((url3) => {
-                            console.log(url3);
+                          
                             if(url3.problem_id === problem_Id_tmp) {
-                                if(url3.result==='AC') {
+                                if(sub_tmp === 'nosub') {
                                     sub_tmp = url3.result;
-                                    ACflag = true;
-                                };
+                                } else if(sub_tmp !== 'AC' && url3.result === 'AC') {
+                                    sub_tmp = url3.result;
+                                } else if(sub_tmp !== 'AC') {
+                                    if(sub_tmp !== 'WA' && url3.result === 'WA') {
+                                        sub_tmp = url3.result;
+                                    } else if(sub_tmp !== 'TLE' && url3.result === 'TLE') {
+                                        sub_tmp = url3.result;
+                                    } else {
+                                        sub_tmp = url3.result;
+                                    }
+                                }
                             }
                         });
-                        
-                        if(ACflag === false) {
-                            url3.map((url3) => {
-                                console.log(url3);
-                                if(url3.problem_id === problem_Id_tmp) {
-                                    sub_tmp = url3.result;
-                                }
-                            });                            
-                        }
 
                     }).then(() => {
+                        let userName_tmp = props.userName===''?'no user':props.userName;
                         const problem_Obj = {
                             title:Name_tmp,
                             url:problemUrl,
                             diff:diff_tmp,
                             problem_id:problem_Id_tmp,
                             contest:contest_tmp,
-                            sub:sub_tmp
+                            sub:sub_tmp,
+                            user:userName_tmp
                         };
 
-                        console.log(problem_Obj.sub);
-                        console.log(sub_tmp);
                         tmp.unshift(problem_Obj);
                         setProblems(tmp);
                         
@@ -142,9 +165,14 @@ function From(props) {
 
         setProblemUrl('');
     }
-    
-    
 
+    function handlePress(event) {
+        if(event.key === 'Enter') {
+            addProblem();
+        }
+    }
+
+    
     function deleteTask(key) {
         let tmp = problems.slice(0, problems.length);
         tmp.splice(key, 1);
@@ -155,7 +183,7 @@ function From(props) {
         <div>
             <main>
             <section className="section">
-                <input className="input" type="text" placeholder="Problem URL" value = {problemUrl} onChange={handleChange} />
+                <input className="input" type="text" placeholder="Problem URL" value = {problemUrl} onChange={handleChange} onKeyPress={handlePress} />
                 <button className="button is-fullwidth is-success is-light" onClick={addProblem}>Add Problem</button>
                 <section className="section">
                     <ProblemSet array={problems} deleteTask={deleteTask}/>
@@ -169,32 +197,34 @@ function From(props) {
 function Main() {
     const [userName, setUserName] = useState('');
 
-    function KeyHandle() {
+    useEffect(() => {
+        if(localStorage.user) {
+            const userName_localst = JSON.parse(localStorage.user);
+            const userform_localst = document.getElementById('userform');
+            userform.value = userName_localst;
+            setUserName(userName_localst);
+            console.log(userName_localst);
+        }
+    }, [])
 
-    }
-    
+    useEffect (() => {
+        localStorage.setItem('user', JSON.stringify(userName));
+    },[userName])
+
     return (
         <div>
             <nav className="navbar" role="navigation" aria-label="main nabigation">
                 <div className="navbar-brand">
-                    <input className="navbar-item" id = 'userform' value = {userName} onChange={e => setUserName(e.target.value)} type="text" placeholder="Username" onKeyPress={KeyHandle}></input>
+                    <input className="navbar-item" id = 'userform' value = {userName} onChange={e => setUserName(e.target.value)} type="text" placeholder="Username"></input>
                 </div>
             </nav>
 
-            <From_hide userName = {userName}/>
+            <From userName = {userName}/>
         </div>
     );
 }
 
-function From_hide(props) {
-    if(props.user !== null) {
-        console.log("$$$$$");
-        console.log(props.userName);
-        return <From userName={props.userName} />
-    } else {
-        console.log("#####");
-    }
-}
+
 
 function Footer() {
     return(
