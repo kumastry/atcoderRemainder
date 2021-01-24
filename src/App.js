@@ -69,7 +69,7 @@ function ProblemSet(props) {
     );
 }
 
-function From(props) {
+function Form(props) {
     const [problemUrl, setProblemUrl] = useState('');
     const [problems, setProblems] = useState([]);
     let userName_tmp = props.userName;
@@ -219,7 +219,7 @@ function Main() {
                 </div>
             </nav>
 
-            <From userName = {userName}/>
+            <Form userName = {userName}/>
         </div>
     );
 }
