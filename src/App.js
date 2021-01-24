@@ -98,14 +98,25 @@ function From(props) {
 
                 } ).then(() => {
                     fetchUesrsSub('kumastry').then((url3) => {
-
+                        let ACflag = false;
                         url3.map((url3) => {
                             console.log(url3);
                             if(url3.problem_id === problem_Id_tmp) {
-                                sub_tmp = url3.result;
-                            
+                                if(url3.result==='AC') {
+                                    sub_tmp = url3.result;
+                                    ACflag = true;
+                                };
                             }
-                        });  
+                        });
+                        
+                        if(ACflag === false) {
+                            url3.map((url3) => {
+                                console.log(url3);
+                                if(url3.problem_id === problem_Id_tmp) {
+                                    sub_tmp = url3.result;
+                                }
+                            });                            
+                        }
 
                     }).then(() => {
                         const problem_Obj = {
