@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "homepage": "http://kumastry.github.io/atcoderReminder",
   "scripts": {
     "build": "react-scripts build",
-    "start": "react-scripts start"
+    "start": "react-scripts start",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +20,7 @@
     "react-share": "^4.3.1"
   },
   "devDependencies": {
+    "gh-pages": "^3.1.0",
     "react-scripts": "^4.0.1"
   },
   "browserslist": {

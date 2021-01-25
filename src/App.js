@@ -240,7 +240,7 @@ function Footer() {
      
                 <div className="columns  is-centered">
                     <div className="column  is-narrow  ">
-                        <a href="https://twitter.com/kumastry1"><TwitterIcon size={48} round /></a>
+                        <a href="https://twitter.com/kumastry1" target="_black"><TwitterIcon size={48} round /></a>
                     </div>
                     
                     <div className="column  is-narrow">
