@@ -1,6 +1,9 @@
 import {useEffect, useState} from 'react';
 import {fetchPromDiff, fetchPromInfo, fetchUesrsSub} from './api';
-
+import {
+    EmailIcon,
+    TwitterIcon
+} from 'react-share';
 
 function Header() {
     return(
@@ -232,7 +235,18 @@ function Footer() {
         <div className="content has-text-centered">
             <hr></hr>
                 <p>2021&copy;kumastry</p>
-                <p><a href = "https://twitter.com/kumastry1">twitter</a></p>
+              
+                
+     
+                <div className="columns  is-centered">
+                    <div className="column  is-narrow  ">
+                        <a href="https://twitter.com/kumastry1"><TwitterIcon size={48} round /></a>
+                    </div>
+                    
+                    <div className="column  is-narrow">
+                        <a href="mailto:kumastry2212@gmail.com"><EmailIcon size={48} round /></a>
+                    </div>
+                </div>
         </div>
     </footer>
     );
