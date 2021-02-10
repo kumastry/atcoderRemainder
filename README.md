@@ -6,7 +6,8 @@
 
 # 使用方法
 1.username欄にAtCoderのニックネームを入力したままの状態にする  
-2.Problem URLにAtCoderの問題ページURL(例：https://atcoder.jp/contests/abc142/tasks/abc142_a)を打ち込む  
+2.Problem URLにAtCoderの問題ページURL(例：https://atcoder.jp/contests/abc142/tasks/abc142_a
+)を打ち込む  
 3.Add ProblemボタンかEnterキーを押す  
 
 # 使用API
