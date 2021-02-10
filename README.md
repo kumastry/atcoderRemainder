@@ -10,7 +10,8 @@
 3.Add ProblemボタンかEnterキーを押す  
 
 # 使用API
-https://github.com/kenkoooo/AtCoderProblems/blob/master/doc/api.md　を使用させて頂きました．
+https://github.com/kenkoooo/AtCoderProblems/blob/master/doc/api.md　
+を使用させて頂きました．
 
 # 注意
 Chromeでサイトが動かない場合はCORSが原因かもしれないので，拡張機能のCORS Unblockを使用してみてください．
